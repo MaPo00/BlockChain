@@ -5,7 +5,6 @@ class Blockchain : IEnumerable<Block>
     private readonly IHashFunction _hashFunction;
     private readonly List<Block> _blocks = new();
 
-
     public Blockchain(IHashFunction hashFunction)
     {
         _hashFunction = hashFunction;
@@ -14,7 +13,7 @@ class Blockchain : IEnumerable<Block>
     public void AddBlock(Block block)
     {
         var tail = _blocks.LastOrDefault();
-        if (block.ParentHash == tail?.Hash)
+        if (tail == null || block.ParentHash == tail.Hash)
         {
             var expectedHash = _hashFunction.GetHash(block.Data + block.ParentHash);
             if (expectedHash == block.Hash)
@@ -23,12 +22,12 @@ class Blockchain : IEnumerable<Block>
             }
             else
             {
-                throw new ApplicationException("Block Hash is invalid");
+                throw new ApplicationException($"Block Hash is invalid. Expected: {expectedHash}, Got: {block.Hash}");
             }
         }
         else
         {
-            throw new ApplicationException($"{block.Hash} is incorrect");
+            throw new ApplicationException($"Parent hash {block.ParentHash} is incorrect");
         }
     }
 
